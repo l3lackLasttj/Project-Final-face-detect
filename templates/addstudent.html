@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include "head.html" %}
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.3.5/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.3.5/dist/sweetalert2.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css">
+</head>
+<body>
+
+{% include "navbar.html" %}
+
+<section class="py-1">
+    <div class="row mt-5">
+        <div class="col-lg-8 offset-lg-2">
+            <h3>เพิ่มรายชื่อ</h3>
+            <hr>
+            <form class="form" method="post" action="/addstudent_code" onsubmit="return validateForm()">
+                <div class="form-group row">
+                    <label for="txtid" class="col-sm-2 col-form-label">ลำดับ</label>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" id="txtid" name="txtid" value={{ newid }} readonly>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="txtname" class="col-sm-2 col-form-label">รหัสนักศึกษา</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="studentcode" name="studentcode" required>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="txtname" class="col-sm-2 col-form-label">ชื่อ</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="txtname" name="txtname" required>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="txtid" class="col-sm-2 col-form-label">ลำดับ</label>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" id="dormitory" name="dormitory" value={{ 7 }} readonly>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="room" class="col-sm-2 col-form-label">ห้องพัก</label>
+                    <div class="col-sm-8">
+                        <select class="form-control" name="room" id="room">
+                        </select>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="btn btn-secondary btn-sm" id="prev-room">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" id="next-room">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="major" class="col-sm-2 col-form-label">สาขา</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="major" name="major" required>
+                    </div>
+                </div>
+                <!-- Submit and Cancel buttons remain the same -->
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label"></label>
+                    <div class="col-sm-8">
+                        <input type="submit" class="btn btn-primary btn-xl" value="สร้าง">
+                        <a href="/" type="button" class="btn btn-danger btn-xl"><b>ยกเลิก</b></a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Include the necessary JavaScript code for the back and next buttons -->
+<script>
+    let select = document.getElementById("room");
+    for (let i = 701; i <= 799; i++) {
+        let option = document.createElement("option");
+        option.value = i;
+        option.text = i;
+        select.appendChild(option);
+    }
+
+    document.getElementById("prev-room").addEventListener("click", function () {
+        let currentIndex = select.selectedIndex;
+
+        if (currentIndex > 0) {
+            select.selectedIndex = currentIndex - 1;
+        }
+    });
+
+    document.getElementById("next-room").addEventListener("click", function () {
+        let currentIndex = select.selectedIndex;
+
+        if (currentIndex < select.length - 1) {
+            select.selectedIndex = currentIndex + 1;
+        }
+    });
+</script>
+
+<!-- Include the validateForm() script -->
+<script>
+    function validateForm() {
+        const studentCode = document.getElementById("studentcode").value;
+        const studentName = document.getElementById("txtname").value;
+        const studentMajor = document.getElementById("major").value;
+        const studentCodeRegex = /^[0-9]{8}$/;
+        const noSpecialCharRegex = /^[a-zA-Z0-9\s]*$/;
+        const noNumberRegex = /^[a-zA-Z\s]*$/;
+    
+        if (!studentCodeRegex.test(studentCode)) {
+            Swal.fire({
+                title: "Error",
+                text: "Student code must be 8 digits.",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+            return false;
+        }
+    
+        if (!noSpecialCharRegex.test(studentName) || !noNumberRegex.test(studentName)) {
+            Swal.fire({
+                title: "Error",
+                text: "Student name should only contain letters.",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+            return false;
+        }
+    
+        if (!noSpecialCharRegex.test(studentMajor) || !noNumberRegex.test(studentMajor)) {
+            Swal.fire({
+                title: "Error",
+                text: "Major should only contain letters.",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+            return false;
+        }
+    
+        return true;
+    }
+</script>
+
+</body>
+</html>

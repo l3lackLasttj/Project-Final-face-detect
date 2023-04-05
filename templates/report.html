@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% include "head.html" %}
+    </head>
+  <body>
+      {% include "navbar.html" %}
+      </head>
+  <body>
+    <div class="container">
+        <div class="card text-center mt-5">
+           
+          <div class="card-header">
+            <h5>รายงานการเข้าออก </h5>
+          </div>
+          <div class="card-body">
+            <form id="search-form">
+              <div class="form-group row">
+                <label for="start_date" class="col-sm-2 col-form-label">วันเริ่มต้น:</label>
+                <div class="col">
+                  <input type="date" class="form-control" id="start_date" name="start_date" required />
+                </div>
+                <label for="end_date" class="col-sm-2 col-form-label">วันสิ้นสุด:</label>
+                <div class="col">
+                  <input type="date" class="form-control" id="end_date" name="end_date" required />
+                </div>
+                <div class='col'>
+              <button type="submit" class="btn btn-warning btn-sm w-100">ค้นหา</button>
+
+                </div>
+              </div>
+
+            </form>
+            <h5 class="mt-4">ข้อมูล </h5>
+            <table id="results-table" class="table table-striped">
+              <thead>
+                <tr>
+                  <th>ลำดับ</th>
+                  <th> ชื่อ </th>
+                  <th>ห้อง </th>
+                  <th>เวลา</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        $("#search-form").submit(function (event) {
+          event.preventDefault();
+          const formData = $(this).serialize();
+          $.ajax({
+            url: "/search",
+            method: "POST",
+            data: formData,
+            dataType: "json",
+            success: function (data) {
+              const tbody = $("#results-table tbody");
+              tbody.empty();
+
+              if (data.error) {
+                Swal.fire('','หาข้อมูลไม่เจอ','error',3000);
+                return;
+              }
+
+              $.each(data, function (index, row) {
+                const tr = $("<tr>");
+                tr.append("<td>" + row.id + "</td>");
+                tr.append("<td>" + row.number  + "</td>");
+                tr.append("<td>" + moment(row.added).locale('th').format('LLLL') + "</td>");
+                tr.append("<td>" + row.action + "</td>");
+                tbody.append(tr);
+              });
+            },
+            error:function(err){
+                Swal.fire('','หาข้อมูลไม่เจอ โปรดลองใหม่อีกครั้ง !!','error',3000)
+            }
+          });
+        });
+      </script>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% include "head.html" %}
+    <!-- Add SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.3.0/dist/sweetalert2.min.css">
+    <!-- Add SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.3.0/dist/sweetalert2.all.min.js"></script>
+  </head>
+  <body>
+    {% include "navbar.html" %}
+
+    <section class="py-1">
+      <div class="row mt-5">
+        <div class="col-lg-8 offset-lg-2">
+          <h3>ข้อมูลนักศึกษา</h3>
+          <hr />
+          <div class="row">
+            <div class="col">
+              <a href="/addstudent" type="button" class="btn btn-success btn-lg"
+                ><b>เพิ่มรายชื่อ</b></a
+              >
+            </div>
+            <div class="col">
+              <a href="/check_in" type="button" class="btn btn-info btn-lg"
+                ><b>เช็คอิน</b></a
+              >
+            </div>
+            <div class="col">
+              <a href="/check_out" type="button" class="btn btn-info btn-lg"
+                ><b>เช็คเอ้าท์</b></a
+              >
+            </div>
+            <div class="col">
+              <a href="/report" type="button" class="btn btn-info btn-lg"
+                ><b>รายงานการเข้าออก</b></a
+              >
+            </div>
+            <div class="col">
+              <a href="/reportpic" type="button" class="btn btn-info btn-lg"
+                ><b>บุคคลภายนอก</b></a
+              >
+            </div>
+          </div>
+          <br />
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>ลำดับ</th>
+                <th>รหัสนักศึกษา</th>
+                <th>ชื่อ</th>
+                <th>สาขา</th>
+                <th>หอพัก</th>
+                <th>ห้อง</th>
+                <th>อยู่ในระบบเมื่อวันที่</th>
+                <th>แก้ไข</th>
+                <th>ลบ</th>
+              </tr>
+            </thead>
+            <tbody id="student-table-body">
+              {% for item in data %}
+              <tr data-student-id="{{item[0]}}">
+                <td class="editable">{{item[0]}}</td>
+                <td class="editable">{{item[1]}}</td>
+                <td class="editable">{{item[2]}}</td>
+                <td class="editable">{{item[3]}}</td>
+                <td class="editable">{{item[4]}}</td>
+                <td class="editable">{{item[5]}}</td>
+                <td>{{item[6]}}</td>
+                <td>
+                  <button type="button" class="btn btn-sm btn-primary" onclick="editStudent({{item[0]}})">แก้ไข</button>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-sm btn-danger" onclick="deleteStudent({{item[0]}})">ลบ</button>
+                </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+                </table>
+                </section>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+    <script>
+      function deleteStudent(studentId) {
+        Swal.fire({
+          title: 'คุณแน่ใจหรือไม่?',
+          text: 'คุณต้องการลบข้อมูลนักศึกษาคนนี้ใช่หรือไม่?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'ใช่, ลบเลย!',
+          cancelButtonText: 'ยกเลิก',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            $.ajax({ type: "DELETE", url: "/delete/" + studentId })
+              .done(function () {
+                Swal.fire('ลบเรียบร้อย!', 'ข้อมูลนักศึกษาถูกลบแล้ว.', 'success').then(function() {
+                  location.reload();
+                });
+              })
+              .fail(function () {
+                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถลบข้อมูลนักศึกษาได้.', 'error');
+              });
+          }
+        });
+      }
+      
+      function editStudent(studentId) {
+        // Find the corresponding row
+        const $row = $(`[data-student-id="${studentId}"]`);
+
+        $row.find(".editable").each(function() {
+          const $cell = $(this);
+          const originalContent = $cell.text();
+
+          $cell.prop("contenteditable", true).focus().on("blur", function () {
+            const newContent = $cell.text();
+
+            if (originalContent !== newContent) {
+              const columnIndex = $cell.index();
+
+              // Define the updated student information
+              const updatedData = {
+                student_id: studentId,
+              };
+
+              switch (columnIndex) {
+                case 1:
+                  updatedData.student_name = newContent;
+                  break;
+                case 2:
+                  updatedData.student_major = newContent;
+                  break;
+                case 3:
+                  updatedData.student_dormitory = newContent;
+                  break;
+                case 4:
+                  updatedData.student_room = newContent;
+                  break;
+              }
+
+              $.ajax({
+                type: "PUT",
+                url: "/edit_student",
+                contentType: "application/json",
+                data: JSON.stringify(updatedData),
+              }).done(function (data) {
+                console.log("Edit student with ID:", studentId);
+              }).fail(function () {
+                Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถแก้ไขข้อมูลนักศึกษาได้.', 'error');
+              });
+            }
+
+            $cell.prop("contenteditable", false);
+          });
+        });
+      }
+
+      $(document).ready(function () {
+        // Attach click event handlers to the buttons
+        $(".btn-danger").on("click", function () {
+          const studentId = $(this).closest("tr").data("student-id");
+          deleteStudent(studentId);
+        });
+        
+        $(".btn-primary").on("click", function () {
+          const studentId = $(this).closest("tr").data("student-id");
+          editStudent(studentId);
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>เพิ่มใบหน้านักศึกษา</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <h1>Edit Student</h1>
+    <form id="edit-form" method="POST" action="/edit">
+        <label for="student_id">Student ID:</label>
+        <input type="text" id="student_id" name="student_id" required><br><br>
+
+        <label for="student_code">Code:</label>
+        <input type="text" id="student_code" name="student_code"><br><br>
+
+        <label for="student_name">Name:</label>
+        <input type="text" id="student_name" name="student_name"><br><br>
+
+        <label for="student_major">Major:</label>
+        <input type="text" id="student_major" name="student_major"><br><br>
+
+        <label for="student_dormitory">Dormitory:</label>
+        <input type="text" id="student_dormitory" name="student_dormitory"><br><br>
+
+        <label for="student_room">Room:</label>
+        <input type="text" id="student_room" name="student_room"><br><br>
+
+        <input type="submit" value="Update">
+    </form>
+    <script>
+        $("#edit-form").on("submit", function (event) {
+            event.preventDefault(); // Prevent the form from submitting directly
+
+            if (!validateForm()) {
+                return;
+            }
+
+            var data = $(this).serialize(); // Serialize the form data
+
+            $.ajax({
+                type: "POST",
+                url: "/edit",
+                data: data,
+                success: function (response) {
+                    // Show a success alert
+                    Swal.fire("Success", "The operation was successful!", "success");
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // Show an error alert
+                    Swal.fire("Error", "The operation failed!", "error");
+                }
+            });
+        });
+
+        function validateForm() {
+            // Get the form input values
+            var student_id = document.getElementById("student_id").value;
+            var student_code = document.getElementById("student_code").value;
+            var student_name = document.getElementById("student_name").value;
+            var student_major = document.getElementById("student_major").value;
+            var student_dormitory = document.getElementById("student_dormitory").value;
+            var student_room = document.getElementById("student_room").value;
+
+            // Check if the student ID is empty
+            if (student_id.trim() === "") {
+                Swal.fire("Error", "Please enter a student ID.", "error");
+                return false;
+            }
+
+            // Check if the name is empty
+            if (student_name.trim() === "") {
+                Swal.fire("Error", "Please enter a name.", "error");
+                return false;
+            }
+
+            // Check if the major is empty
+            if (student_major.trim() === "") {
+                Swal.fire("Error", "Please enter a major.", "error");
+                return false;
+            }
+
+            // Check if the dormitory is empty
+            if (student_dormitory.trim() === "") {
+                Swal.fire("Error", "Please enter a dormitory.", "error");
+                return false;
+            }
+
+            // Check if the room is empty
+            if (student_room.trim() === "") {
+                Swal.fire("Error", "Please enter a room.", "error");
+                return false;
+            }
+
+            // If all the input values are valid, submit the form
+            return true;
+        }
+    </script>
+</body>
+</html>
+
